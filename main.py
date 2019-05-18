@@ -6,12 +6,9 @@ http://stats.stackexchange.com/a/17556/43909
 
 Copyright 2014 Cosmo Harrigan
 This program is free software, distributed under the terms of the GNU LGPL v3.0
-
-Modified by Jaedong Hwang for experiments of Cognitive Psychology
 """
 
-#__author__ = 'Cosmo Harrigan'
-__author__ = 'Jaedong Hwang'
+__author__ = 'Cosmo Harrigan'
 
 from matplotlib import pyplot
 from neighborhood_functions import avg_components
@@ -132,13 +129,13 @@ if __name__ == '__main__':
     if not os.path.exists(PATH) :
         os.mkdir(PATH)
 
-    list_dir = os.listdir(PATH)
-    for e in range(len(list_dir)) :
-        if 'trial_{:03d}'.format(e) in list_dir:
-            tr = e
+    list_dir = sorted(os.listdir(PATH))
+    for idx, e in enumerate(list_dir) :
+        if 'trial_{:03d}'.format(tr) in e:
+            tr += 1
     used_originals = {}
+    seed = random.randint(0,2147483647)
     for m in range(num_matrices):
-        seed = random.randint(0,2147483647)
         #matrix = input_matrices[m]
         score = -1 
         key = 'KEY'
@@ -149,9 +146,12 @@ if __name__ == '__main__':
             score, _, _ = calculate_entropy(matrix)
             seed += 1
             key = mat2key(matrix)
-
+        
+        if num_flips == 0 :
+            save_matrix(m,shape, score, matrix,name='{}_{:03d}_'.format(num_flips,m+tr), path=PATH)
+            continue
         path = os.path.join(PATH,'trial_{:03d}_{:03d}_{}'.format(tr+m,int(round(score*100)), seed))
-        save_matrix(m,shape, score, matrix,name='aoriginal', path=path)
+        save_matrix(m,shape, score, matrix,name='{}_{:03d}_'.format(num_flips,m+tr), path=path)
         # TODO make flipper
         used = {}
         flattened_matrix = matrix.flatten()
@@ -171,7 +171,7 @@ if __name__ == '__main__':
             if i % 100 ==0 : 
                 print("{:01d} {:.2f} {:.2f} {:.3f}".format(i, score, new_score, ratio))
             save_matrix(2, shape, new_score, new_matrix^matrix,name='zmask',  path=path, ratio=ratio)
-            save_matrix(1, shape, new_score,new_matrix, path=path, ratio=ratio)
+            save_matrix(1, shape, new_score,new_matrix, path=path, name='{}_{:03d}_'.format(num_flips, m+tr),  ratio=ratio)
         if m % 10 == 0 :
             print("{}".format(m))
     print("DONE")
